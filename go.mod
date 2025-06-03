@@ -1,4 +1,4 @@
-module github.com/sda1_hacker/iec61850
+module github.com/sda1-hacker/iec61850
 
 go 1.23.0
 
