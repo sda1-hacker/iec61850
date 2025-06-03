@@ -44,7 +44,8 @@ func GOOSETestMain(ifaceName string) {
 	C.GooseReceiver_setInterfaceId(receiver, iface)
 
 	// 创建订阅者
-	gocbRef := C.CString("simpleIOGenericIO/LLN0$GO$gcbAnalogValues")
+	// gocbRef := C.CString("simpleIOGenericIO/LLN0$GO$gcbAnalogValues")
+	gocbRef := C.CString("")
 	defer C.free(unsafe.Pointer(gocbRef))
 	subscriber := C.GooseSubscriber_create(gocbRef, nil)
 
