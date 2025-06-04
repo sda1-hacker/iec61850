@@ -2,7 +2,7 @@ package cmds
 
 import (
 	"fmt"
-	"github.com/sda1_hacker/iec61850/scl"
+	"github.com/sda1-hacker/iec61850/scl"
 	"github.com/spf13/cobra"
 	"os"
 )

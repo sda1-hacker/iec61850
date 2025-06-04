@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/sda1_hacker/iec61850"
+	"github.com/sda1-hacker/iec61850"
 	"log"
 	"time"
 )
 
-// import "github.com/sda1_hacker/iec61850"
+// import "github.com/sda1-hacker/iec61850"
 
 func main() {
 

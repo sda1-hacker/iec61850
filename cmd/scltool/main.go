@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/sda1_hacker/iec61850/cmd/scltool/cmds"
+	"github.com/sda1-hacker/iec61850/cmd/scltool/cmds"
 	"os"
 )
 

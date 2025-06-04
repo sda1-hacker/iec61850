@@ -14,7 +14,7 @@ import (
 
 var (
 	nextManagerID    uintptr
-	reportManagersMu sync.Mutex
+	reportManagersMu sync.RWMutex
 	reportManagers   = make(map[uintptr]*ReportManager)
 )
 
@@ -25,7 +25,7 @@ type ReportManager struct {
 	dataChan   chan ReportData            // 数据channel
 	rcb        C.ClientReportControlBlock // rcb
 	dataSetDir C.LinkedList               // 数据集目录
-	id         uintptr                    // 函数id
+	id         uintptr                    // ReportManager的id
 
 	// settings   *ClientReportControlBlock  // 控制块配置
 }

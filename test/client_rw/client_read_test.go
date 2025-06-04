@@ -3,8 +3,8 @@ package client_rw
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/sda1_hacker/iec61850"
-	"github.com/sda1_hacker/iec61850/test"
+	"github.com/sda1-hacker/iec61850"
+	"github.com/sda1-hacker/iec61850/test"
 	"testing"
 )
 
