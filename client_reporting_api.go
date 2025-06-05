@@ -154,9 +154,9 @@ func (m *ReportManager) TriggerReport() {
 	defer C.free(unsafe.Pointer(cRcbRef))
 	C.IedConnection_triggerGIReport(m.C.conn, &errCode, cRcbRef)
 	if err := GetIedClientError(errCode); err != nil {
-		log.Printf("触发报告失败.. %s \n", err.Error())
+		log.Printf("TriggerReport FAIL.. err: %s \n", err.Error())
 	} else {
-		log.Printf("触发报告成功.. rbcRef: %s", m.RCBRef)
+		// log.Printf("TriggerReport SUCCESS.. rbcRef: %s", m.RCBRef)
 	}
 }
 
