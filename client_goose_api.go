@@ -103,22 +103,10 @@ func (m *GooseManager) Subscribe() {
 	// 启动接收器
 	C.GooseReceiver_start(receiver)
 
-	log.Printf("开启监听网卡: %s \n", m.Iface)
+	log.Printf("listen iface: %s \n", m.Iface)
 
-	// 持续监听
-	//for {
-	//	select {
-	//	case <-m.ctx.Done():
-	//		// 清理资源
-	//		C.GooseReceiver_stop(receiver)
-	//		C.GooseSubscriber_destroy(subscriber)
-	//		C.GooseReceiver_destroy(receiver)
-	//		log.Printf("取消GOOSE监听..")
-	//		return
-	//	}
-	//}
 	<-m.ctx.Done()
-	log.Printf("取消GOOSE监听..")
+	log.Printf("cancel goose \n")
 
 }
 
