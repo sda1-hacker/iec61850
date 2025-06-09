@@ -26,10 +26,7 @@ type GooseManager struct {
 	ctx        context.Context    // ctx
 	cancelFunc context.CancelFunc // 停止函数
 	id         uintptr            // GooseManager的id
-
-	// 添加C资源指针
-	receiver   C.GooseReceiver
-	subscriber C.GooseSubscriber
+	wg         sync.WaitGroup     // WaitGroup 用于同步
 }
 
 type GooseData struct {
@@ -65,9 +62,11 @@ func NewGooseManager(iface string, goCbRef string, appId int, channelSize int) *
 
 // 订阅
 func (m *GooseManager) Subscribe() {
+	m.wg.Add(1)
+	defer m.wg.Done()
+
 	// 创建接收器
 	receiver := C.GooseReceiver_create()
-	m.receiver = receiver
 
 	// 设置网络接口（默认eth0）
 	iface := C.CString(m.Iface)
@@ -78,7 +77,6 @@ func (m *GooseManager) Subscribe() {
 	gocbRef := C.CString(m.GoCbRef)
 	defer C.free(unsafe.Pointer(gocbRef))
 	subscriber := C.GooseSubscriber_create(gocbRef, nil)
-	m.subscriber = subscriber
 
 	// 设置目标MAC地址 (01:0c:cd:01:00:01)  --> 这个需要抽离出来作为参数
 	var dstMac [6]C.uint8_t = [6]C.uint8_t{0x01, 0x0c, 0xcd, 0x01, 0x00, 0x01}
@@ -108,14 +106,20 @@ func (m *GooseManager) Subscribe() {
 	<-m.ctx.Done()
 	log.Printf("cancel goose \n")
 
+	C.GooseReceiver_stop(receiver)
+	C.GooseReceiver_destroy(receiver)
+	// C.GooseSubscriber_destroy(subscriber) // 官方的案例，没有调用这个方法
+	log.Printf("回收goose资源.. \n")
+
 }
 
 // 取消订阅
 func (m *GooseManager) UnSubscribe() {
-	// 先停止再清理
-	if m.receiver != nil {
-		C.GooseReceiver_stop(m.receiver)
-	}
+
+	// 取消上下文
+	m.cancelFunc()
+
+	m.wg.Wait()
 
 	// 从全局注册表中移除
 	if m.id != 0 {
@@ -124,20 +128,6 @@ func (m *GooseManager) UnSubscribe() {
 		gooseManagersMu.Unlock()
 		m.id = 0
 	}
-
-	// 清理C资源
-	if m.subscriber != nil {
-		C.GooseSubscriber_destroy(m.subscriber)
-		m.subscriber = nil
-	}
-
-	if m.receiver != nil {
-		C.GooseReceiver_destroy(m.receiver)
-		m.receiver = nil
-	}
-
-	// 取消上下文
-	m.cancelFunc()
 
 	// 安全关闭channel
 	close(m.dataChan)

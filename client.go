@@ -11,6 +11,7 @@ type Client struct {
 	conn      C.IedConnection
 	tlsConfig C.TLSConfiguration
 	connected *atomic.Bool
+	settings  *Settings
 }
 
 // Settings 连接配置
@@ -53,6 +54,7 @@ func newClient(settings Settings, tlsConfig *TLSConfig) (*Client, error) {
 	connected := &atomic.Bool{}
 	connected.Store(true)
 	client.connected = connected
+	client.settings = &settings
 	return client, nil
 }
 

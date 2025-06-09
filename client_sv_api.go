@@ -90,8 +90,7 @@ type SvManager struct {
 	cancelFunc    context.CancelFunc          // 停止函数
 	id            uintptr                     // SvManager的id
 	dataStructMap map[string][]ASDUDataStruct // key: SvID, value: []ASDUDataStruct
-	receiver      C.SVReceiver
-	subscriber    C.SVSubscriber
+	wg            sync.WaitGroup              // WaitGroup 用于同步
 }
 
 type SvData struct {
@@ -146,10 +145,13 @@ func NewSvManager(iface string, appId uint16, dataStructMap map[string][]ASDUDat
 }
 
 func (m *SvManager) Subscribe() {
+	m.wg.Add(1)
+	defer m.wg.Done() // 确保方法退出时标记完成
 
 	// 创建接收器
 	receiver := C.SVReceiver_create()
-	m.receiver = receiver
+
+	//m.receiver = receiver
 
 	// 设置网络接口（默认eth0）
 	cIface := C.CString(m.Iface)
@@ -158,7 +160,7 @@ func (m *SvManager) Subscribe() {
 
 	// 创建订阅者（APPID 0x4000）
 	subscriber := C.SVSubscriber_create(nil, C.uint16_t(m.AppId))
-	m.subscriber = subscriber
+	// m.subscriber = subscriber
 
 	// 在全局注册表中注册管理器
 	svManagersMu.Lock()
@@ -181,35 +183,29 @@ func (m *SvManager) Subscribe() {
 	<-m.ctx.Done()
 	log.Printf("cancel sv \n")
 
+	// 结束之后销毁C资源
+	C.SVReceiver_stop(receiver)
+	C.SVReceiver_destroy(receiver)
+	// C.SVSubscriber_destroy(subscriber) // 官方的案例，没有调用这个方法
+	log.Printf("回收sv资源.. \n")
+
 }
 
 func (m *SvManager) UnSubscribe() {
 
-	if m.receiver != nil {
-		C.SVReceiver_stop(m.receiver)
-	}
+	// 取消上下文
+	m.cancelFunc()
+
+	m.wg.Wait()
 
 	// 从全局注册表移除
 	svManagersMu.Lock()
 	delete(svManagers, m.id)
 	svManagersMu.Unlock()
 
-	// 销毁C资源
-	if m.subscriber != nil {
-		C.SVSubscriber_destroy(m.subscriber)
-		m.subscriber = nil
-	}
-
-	if m.receiver != nil {
-		C.SVReceiver_destroy(m.receiver)
-		m.receiver = nil
-	}
-
-	// 取消上下文
-	m.cancelFunc()
-
 	// 安全关闭channel
 	close(m.dataChan)
+
 }
 
 func (m *SvManager) GetDataChan() <-chan SvData {

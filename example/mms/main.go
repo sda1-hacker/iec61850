@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/sda1-hacker/iec61850"
 	"log"
+
+	"github.com/sda1-hacker/iec61850"
 )
 
 func main() {

@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/sda1-hacker/iec61850"
 )
 
@@ -48,8 +50,14 @@ func main() {
 	// 启动一个携程监听goose事件
 	go manager.Subscribe()
 
+	timer := time.NewTimer(time.Second * 5)
+
 	for {
 		select {
+		case <-timer.C:
+			manager.UnSubscribe()
+			fmt.Printf("取消注册了.. \n")
+			return
 		case data := <-dataChan:
 			fmt.Printf("SvID: %d \n", data.SvID)
 			fmt.Printf("ConfRev: %s \n", data.ConfRev)
