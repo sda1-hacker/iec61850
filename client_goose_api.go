@@ -190,7 +190,7 @@ func goGooseCallback(subscriber C.GooseSubscriber, parameter unsafe.Pointer) {
 	select {
 	case manager.dataChan <- data:
 	default:
-		log.Println("Goose channel full, dropping data")
+		log.Println("Goose channel full, dropping data！")
 	}
 
 }
